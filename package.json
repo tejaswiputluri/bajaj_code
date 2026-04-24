@@ -1,0 +1,26 @@
+{
+  "name": "srm-fullstack-challenge",
+  "version": "1.0.0",
+  "description": "SRM Full Stack Engineering Challenge - REST API and Frontend",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "npm run build:server && npm run build:client",
+    "build:server": "echo 'Server ready'",
+    "build:client": "cd client && npm run build"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "api",
+    "hierarchy",
+    "graph",
+    "srm"
+  ],
+  "author": "",
+  "license": "ISC"
+}

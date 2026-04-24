@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hierarchy Builder - SRM Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 250px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: none;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .clear-btn {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .clear-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .example-btn {
+            background: #f0f4ff;
+            color: #667eea;
+            border: 1px solid #667eea;
+        }
+
+        .example-btn:hover {
+            background: #e8f0ff;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            border-left: 4px solid #c62828;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .results-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .result-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .summary-value {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .hierarchies-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .hierarchy-item {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .hierarchy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .root-label {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .hierarchy-meta {
+            font-size: 0.85em;
+            color: #999;
+        }
+
+        .cycle-badge {
+            background: #ff9800;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+
+        .depth-badge {
+            background: #4caf50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+
+        .tree-display {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #666;
+            background: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .invalid-entries,
+        .duplicate-edges {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .entry-item {
+            background: #fff3e0;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #ff9800;
+            font-family: monospace;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .info-text {
+            font-size: 0.9em;
+            color: #999;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        .example-format {
+            background: #f0f4ff;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #667eea;
+            font-family: monospace;
+            border-left: 3px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌳 Hierarchy Builder</h1>
+            <p>SRM Full Stack Engineering Challenge</p>
+        </header>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>Input</h2>
+                <textarea id="inputArea" placeholder="Enter node relationships, one per line&#10;Example:&#10;A->B&#10;A->C&#10;B->D"></textarea>
+                <div class="example-format">Format: X->Y (e.g., A->B)</div>
+                <div class="button-group">
+                    <button class="submit-btn" onclick="submitData()">Submit</button>
+                    <button class="clear-btn" onclick="clearAll()">Clear</button>
+                    <button class="example-btn" onclick="loadExample()">Load Example</button>
+                </div>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px; color: #667eea;">Processing...</p>
+                </div>
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+            </div>
+
+            <div class="card">
+                <h2>Response Summary</h2>
+                <div id="summaryContainer" class="hidden">
+                    <div class="summary-item">
+                        <span class="summary-label">User ID:</span>
+                        <span class="summary-value" id="userId">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Total Trees:</span>
+                        <span class="summary-value" id="totalTrees">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Total Cycles:</span>
+                        <span class="summary-value" id="totalCycles">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Largest Tree Root:</span>
+                        <span class="summary-value" id="largestRoot">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Invalid Entries:</span>
+                        <span class="summary-value" id="invalidCount">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Duplicate Edges:</span>
+                        <span class="summary-value" id="duplicateCount">-</span>
+                    </div>
+                </div>
+                <div class="info-text">Submit your input to see the analysis results here.</div>
+            </div>
+        </div>
+
+        <div id="resultsContainer" class="results-container hidden">
+            <div class="result-card">
+                <h3>📊 Hierarchies</h3>
+                <div class="hierarchies-list" id="hierarchiesList"></div>
+            </div>
+
+            <div class="result-card">
+                <h3>⚠️ Validation Results</h3>
+                <div id="validationResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+
+        function submitData() {
+            const input = document.getElementById('inputArea').value.trim();
+
+            if (!input) {
+                showError('Please enter some data');
+                return;
+            }
+
+            const lines = input.split('\n').map(line => line.trim()).filter(line => line);
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+
+            fetch(`${API_URL}/bfhl`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ data: lines })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'API error');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                displayResults(data);
+                showSuccess('Data processed successfully!');
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                showError('Error: ' + error.message);
+            });
+        }
+
+        function displayResults(data) {
+            // Update summary
+            document.getElementById('userId').textContent = data.user_id;
+            document.getElementById('totalTrees').textContent = data.summary.total_trees;
+            document.getElementById('totalCycles').textContent = data.summary.total_cycles;
+            document.getElementById('largestRoot').textContent = data.summary.largest_tree_root || 'N/A';
+            document.getElementById('invalidCount').textContent = data.invalid_entries.length;
+            document.getElementById('duplicateCount').textContent = data.duplicate_edges.length;
+
+            document.getElementById('summaryContainer').classList.remove('hidden');
+
+            // Display hierarchies
+            const hierarchiesList = document.getElementById('hierarchiesList');
+            hierarchiesList.innerHTML = '';
+
+            data.hierarchies.forEach(hierarchy => {
+                const item = document.createElement('div');
+                item.className = 'hierarchy-item';
+
+                const header = document.createElement('div');
+                header.className = 'hierarchy-header';
+
+                const rootLabel = document.createElement('span');
+                rootLabel.className = 'root-label';
+                rootLabel.textContent = 'Root: ' + hierarchy.root;
+
+                const meta = document.createElement('div');
+                meta.className = 'hierarchy-meta';
+
+                if (hierarchy.has_cycle) {
+                    const cycleBadge = document.createElement('span');
+                    cycleBadge.className = 'cycle-badge';
+                    cycleBadge.textContent = '🔄 Cycle Detected';
+                    meta.appendChild(cycleBadge);
+                } else {
+                    const depthBadge = document.createElement('span');
+                    depthBadge.className = 'depth-badge';
+                    depthBadge.textContent = 'Depth: ' + hierarchy.depth;
+                    meta.appendChild(depthBadge);
+                }
+
+                header.appendChild(rootLabel);
+                header.appendChild(meta);
+                item.appendChild(header);
+
+                if (!hierarchy.has_cycle) {
+                    const treeDisplay = document.createElement('div');
+                    treeDisplay.className = 'tree-display';
+                    treeDisplay.textContent = formatTree(hierarchy.tree);
+                    item.appendChild(treeDisplay);
+                }
+
+                hierarchiesList.appendChild(item);
+            });
+
+            // Display validation results
+            const validationResults = document.getElementById('validationResults');
+            validationResults.innerHTML = '';
+
+            if (data.invalid_entries.length > 0) {
+                const invalidSection = document.createElement('div');
+                invalidSection.innerHTML = '<h4 style="color:#ff9800; margin-bottom:10px;">❌ Invalid Entries (' + data.invalid_entries.length + ')</h4>';
+                const invalidList = document.createElement('div');
+                invalidList.className = 'invalid-entries';
+                data.invalid_entries.forEach(entry => {
+                    const item = document.createElement('div');
+                    item.className = 'entry-item';
+                    item.textContent = entry;
+                    invalidList.appendChild(item);
+                });
+                invalidSection.appendChild(invalidList);
+                validationResults.appendChild(invalidSection);
+            }
+
+            if (data.duplicate_edges.length > 0) {
+                const duplicateSection = document.createElement('div');
+                duplicateSection.innerHTML = '<h4 style="color:#ff9800; margin-bottom:10px; margin-top:20px;">⚠️ Duplicate Edges (' + data.duplicate_edges.length + ')</h4>';
+                const duplicateList = document.createElement('div');
+                duplicateList.className = 'duplicate-edges';
+                data.duplicate_edges.forEach(edge => {
+                    const item = document.createElement('div');
+                    item.className = 'entry-item';
+                    item.textContent = edge;
+                    duplicateList.appendChild(item);
+                });
+                duplicateSection.appendChild(duplicateList);
+                validationResults.appendChild(duplicateSection);
+            }
+
+            if (data.invalid_entries.length === 0 && data.duplicate_edges.length === 0) {
+                validationResults.innerHTML = '<p style="color:#4caf50;">✓ All entries are valid!</p>';
+            }
+
+            document.getElementById('resultsContainer').classList.remove('hidden');
+        }
+
+        function formatTree(tree, indent = '') {
+            if (Object.keys(tree).length === 0) {
+                return '{}';
+            }
+
+            let result = '';
+            Object.keys(tree).forEach((key, index) => {
+                result += indent + key + '\n';
+                const children = tree[key];
+                if (Object.keys(children).length > 0) {
+                    result += formatTree(children, indent + '  ');
+                }
+            });
+            return result;
+        }
+
+        function clearAll() {
+            document.getElementById('inputArea').value = '';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('resultsContainer').classList.add('hidden');
+            document.getElementById('summaryContainer').classList.add('hidden');
+        }
+
+        function loadExample() {
+            const example = `A->B
+A->C
+B->D
+C->E
+E->F
+X->Y
+Y->Z
+Z->X
+P->Q
+Q->R
+G->H
+G->H
+G->I
+hello
+1->2
+A->`;
+            document.getElementById('inputArea').value = example;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Load example on page load for demo purposes
+        window.addEventListener('load', () => {
+            document.getElementById('inputArea').focus();
+        });
+    </script>
+</body>
+</html>
