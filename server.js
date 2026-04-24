@@ -31,7 +31,9 @@ app.post('/bfhl', (req, res) => {
       hierarchies: result.hierarchies,
       invalid_entries: result.invalid_entries,
       duplicate_edges: result.duplicate_edges,
-      summary: result.summary
+      num_trees: result.summary.total_trees,
+      num_cycles: result.summary.total_cycles,
+      largest_tree_root: result.summary.largest_tree_root
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -122,18 +124,24 @@ function processHierarchy(data) {
     // Detect cycles and build tree
     const { tree, has_cycle } = buildTree(root, graph, component);
 
+    const nodesList = Array.from(component).sort();
+    const depth = calculateDepth(root, tree);
+
     if (has_cycle) {
       hierarchies.push({
         root: root,
         tree: {},
-        has_cycle: true
+        has_cycle: true,
+        depth_of_tree: null,
+        nodes: nodesList
       });
     } else {
-      const depth = calculateDepth(root, tree);
       hierarchies.push({
         root: root,
         tree: tree,
-        depth: depth
+        has_cycle: false,
+        depth_of_tree: depth,
+        nodes: nodesList
       });
     }
   }
@@ -146,10 +154,10 @@ function processHierarchy(data) {
   let max_depth = 0;
 
   for (const hierarchy of hierarchies) {
-    if (!hierarchy.has_cycle && hierarchy.depth > max_depth) {
-      max_depth = hierarchy.depth;
+    if (!hierarchy.has_cycle && hierarchy.depth_of_tree > max_depth) {
+      max_depth = hierarchy.depth_of_tree;
       largest_tree_root = hierarchy.root;
-    } else if (!hierarchy.has_cycle && hierarchy.depth === max_depth && hierarchy.root < largest_tree_root) {
+    } else if (!hierarchy.has_cycle && hierarchy.depth_of_tree === max_depth && hierarchy.root < largest_tree_root) {
       largest_tree_root = hierarchy.root;
     }
   }
@@ -169,7 +177,7 @@ function processHierarchy(data) {
   };
 }
 
-// Validate node format: X->Y where X and Y are single uppercase letters
+// Validate node format: X->Y where X and Y are single uppercase letters (including self-loops)
 function isValidNodeFormat(entry) {
   if (typeof entry !== 'string' || entry.length === 0) {
     return false;
@@ -177,12 +185,6 @@ function isValidNodeFormat(entry) {
 
   const pattern = /^[A-Z]->[A-Z]$/;
   if (!pattern.test(entry)) {
-    return false;
-  }
-
-  const [parent, child] = entry.split('->');
-  // Self-loop is invalid
-  if (parent === child) {
     return false;
   }
 
